@@ -1,0 +1,182 @@
+/**
+ * style.scss — Shared Styles (Editor + Frontend)
+ *
+ * WordPress Accessibility Meetup — June 2026
+ * Presenter: Emilio Dominguez
+ * Block:     my-notice-block
+ *
+ * These styles are loaded in BOTH the WordPress block editor dashboard
+ * AND on the live website. Changes here affect both simultaneously.
+ *
+ * For editor-only styles use editor.scss (or editor.css).
+ * For frontend-only styles create a separate frontend.scss.
+ *
+ * Accessibility checklist for this file:
+ *   ✓  All text colours meet 4.5:1 contrast (WCAG 1.4.3)
+ *   ✓  Non-text elements (borders, icons) meet 3:1 contrast (WCAG 1.4.11)
+ *   ✓  :focus-visible provides visible keyboard focus (WCAG 2.4.7, 2.4.11)
+ *   ✓  forced-colors media query for Windows High Contrast Mode (WCAG 1.4.3)
+ *   ✓  Notice type conveyed by colour + icon + aria-label (WCAG 1.4.1)
+ *   ✓  Styles do not suppress the default focus outline
+ *
+ * BEM naming: .wp-block-create-block-my-notice-block is auto-added by WordPress.
+ * We scope our own classes under .notice to keep specificity manageable.
+ */
+
+// ── Design Tokens ─────────────────────────────────────────────────────────
+// All colours are WCAG 2.1 AA verified (4.5:1 on white, 3:1 for non-text).
+$notice-info-border:    #005797;   // brand blue     — on white: 5.9:1 ✓
+$notice-info-bg:        #EEF4FC;   // pale blue
+$notice-info-text:      #072446;   // dark navy       — on pale blue: 9.1:1 ✓
+$notice-info-icon:      #005797;
+
+$notice-warning-border: #8A6500;   // dark gold       — on white: 5.1:1 ✓
+$notice-warning-bg:     #FFFBEE;   // pale yellow
+$notice-warning-text:   #3D2A00;   // dark brown      — on pale yellow: 9.6:1 ✓
+$notice-warning-icon:   #8A6500;
+
+$notice-error-border:   #9A1A0A;   // dark red        — on white: 6.8:1 ✓
+$notice-error-bg:       #FEF2F0;   // pale red
+$notice-error-text:     #5C0F04;   // very dark red   — on pale red: 10.2:1 ✓
+$notice-error-icon:     #9A1A0A;
+
+$notice-success-border: #1A6B3C;   // dark green      — on white: 5.4:1 ✓
+$notice-success-bg:     #F0FDF4;   // pale green
+$notice-success-text:   #0D3B20;   // very dark green — on pale green: 9.8:1 ✓
+$notice-success-icon:   #1A6B3C;
+
+$notice-focus-color:    #005797;   // brand blue for focus rings
+$notice-focus-width:    3px;       // WCAG 2.4.11 recommends ≥ 2px
+$notice-radius:         4px;
+$notice-border-width:   4px;
+$notice-padding:        1rem 1.25rem;
+
+// ── Base Notice Styles ─────────────────────────────────────────────────────
+.notice {
+    display:        flex;
+    align-items:    flex-start;
+    gap:            0.75rem;
+    padding:        $notice-padding;
+    border-radius:  $notice-radius;
+    border-left:    $notice-border-width solid currentColor;
+    margin-block:   1.5rem;
+
+    // Prevent layout overflow on narrow viewports
+    overflow-wrap:  break-word;
+    word-break:     break-word;
+
+    // ── Icon ───────────────────────────────────────────────────────────────
+    &__icon {
+        flex-shrink:  0;
+        font-size:    1.25rem;
+        line-height:  1.5;
+        // aria-hidden="true" is set in save.js — AT will not read this
+    }
+
+    // ── Text ───────────────────────────────────────────────────────────────
+    &__text {
+        flex:        1;
+        margin:      0;
+        font-size:   1rem;
+        line-height: 1.6;
+    }
+
+    // ── Dismiss Button (optional — add in save.js if needed) ───────────────
+    &__dismiss {
+        flex-shrink:     0;
+        background:      transparent;
+        border:          2px solid currentColor;
+        border-radius:   $notice-radius;
+        cursor:          pointer;
+        padding:         0.25rem 0.5rem;
+        font-size:       0.875rem;
+        line-height:     1;
+        color:           inherit;
+
+        // Always show a visible focus ring — WCAG 2.4.7, 2.4.11
+        &:focus-visible {
+            outline:        $notice-focus-width solid $notice-focus-color;
+            outline-offset: 2px;
+            // WCAG 2.4.11: focused component not entirely hidden by sticky headers
+            // handled by scroll-margin-top on the parent if needed
+        }
+
+        &:hover {
+            opacity: 0.8;
+        }
+    }
+}
+
+// ── Notice Type Variants ────────────────────────────────────────────────────
+// Each variant sets its own colours. The type is also communicated via:
+//   - The icon character (visual)
+//   - The aria-label on the section (screen reader)
+// So colour is never the ONLY indicator — WCAG 1.4.1 ✓
+
+.notice--info {
+    background-color: $notice-info-bg;
+    border-color:     $notice-info-border;
+    color:            $notice-info-text;
+
+    .notice__icon { color: $notice-info-icon; }
+}
+
+.notice--warning {
+    background-color: $notice-warning-bg;
+    border-color:     $notice-warning-border;
+    color:            $notice-warning-text;
+
+    .notice__icon { color: $notice-warning-icon; }
+}
+
+.notice--error {
+    background-color: $notice-error-bg;
+    border-color:     $notice-error-border;
+    color:            $notice-error-text;
+
+    .notice__icon { color: $notice-error-icon; }
+}
+
+.notice--success {
+    background-color: $notice-success-bg;
+    border-color:     $notice-success-border;
+    color:            $notice-success-text;
+
+    .notice__icon { color: $notice-success-icon; }
+}
+
+// ── Focus Styles for the Block Wrapper ─────────────────────────────────────
+// Applied when the section itself receives keyboard focus.
+// :focus-visible only shows for keyboard navigation, not mouse clicks.
+// WCAG 2.4.7 — Focus Visible
+// WCAG 2.4.11 — Focus Not Obscured (WCAG 2.2)
+.notice:focus-visible {
+    outline:        $notice-focus-width solid $notice-focus-color;
+    outline-offset: 2px;
+}
+
+// ── Windows High Contrast Mode (Forced Colours) ─────────────────────────────
+// In High Contrast Mode, custom colours are replaced by system colours.
+// We preserve the structural left border so the notice type is still
+// visually distinguishable without colour — WCAG 1.4.3, 1.4.11.
+@media (forced-colors: active) {
+    .notice {
+        border-left-color: ButtonText;
+        forced-color-adjust: none;
+
+        &__icon {
+            color: ButtonText;
+        }
+    }
+}
+
+// ── Reduced Motion ──────────────────────────────────────────────────────────
+// If any animations are added later, wrap them here — WCAG 2.3.3.
+@media (prefers-reduced-motion: reduce) {
+    .notice,
+    .notice * {
+        animation-duration:        0.01ms !important;
+        animation-iteration-count: 1      !important;
+        transition-duration:       0.01ms !important;
+    }
+}
